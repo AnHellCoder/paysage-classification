@@ -22,7 +22,7 @@ from inference import inference
 @click.option('--path-labels', default='data/labels.txt', help='Путь до файла с названиями классов')
 @click.option('--path-splits', default='data/', help='Путь до CSVшек с выборками train-eval-test')
 @click.option('--path-checkpoint', default='models/', help='Путь до модели (при test) либо место сохранения оной (при train)')
-@click.option('--path-infers', default='pred/', help='Путь до папки с картинками для предсказывания (при inference)')
+@click.option('--path-infers', default='pred/', help='Путь до картинки или каталога для предсказывания (при inference)')
 @click.option('--dataset-name', default='nitishabharathi/scene-classification', help='Название датасета на KaggleHub')
 @click.option('--dataset-splits', default='0.7-0.2-0.1', help='Как разделить датасет (три числа от 0 до 1 через дефис)')
 def run(
@@ -118,18 +118,32 @@ def run(
 
     else:
         # В остальных случаях -- просто выполняем инференс
-        image_pathes = [file for file in Path(path_infers).iterdir() if file.is_file()]
-
         model = torch.load(path_checkpoint, weights_only=False)
 
-        for image_path in image_pathes:
+        if (Path(path_infers).is_dir()):
+            image_pathes = [file for file in Path(path_infers).iterdir() if file.is_file()]
+
+            for image_path in image_pathes:
+                inference(
+                    model,
+                    image_path,
+                    labels_list,
+                    transform_list,
+                    # output='mpl'
+                    output='std'
+                )
+
+        elif (Path(path_infers).is_file()):
             inference(
                 model,
-                image_path,
+                Path(path_infers),
                 labels_list,
                 transform_list,
-                output='mpl'
+                output='std'
             )
+        
+        else:
+            print('Некорректный путь до файла или каталога.')
 
 
 if __name__ == '__main__':
