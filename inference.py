@@ -19,8 +19,14 @@ def inference(
 
     (preds, probas) = model.predict(tensor)
     
+    # Вывод в stdout (можно через pipe перенаправить в файл)
     if output == 'std':
-        print(labels_list[preds.tolist()[0]])
+        print(f'\n{path_image}')
+        for i, p in enumerate(probas.tolist()[0]):
+            print(f'{labels_list[i]} -- {p:.20f}')
+        # print()
+
+    # Вывод в виде интерактивного окна MatPlotLib, для демки
     else:
         with Image.open(path_image) as img:
             img_rgb = img.convert('RGB') # На всякий случай
